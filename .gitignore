@@ -2,9 +2,13 @@
 *.tfstate
 *.tfstate.*
 *.tfvars
+terraform.tfvars
+
 crash.log
 crash.*.log
-.DS_Store
-.env
+
+.idea/
+.vscode/
+
 __pycache__/
 *.pyc
