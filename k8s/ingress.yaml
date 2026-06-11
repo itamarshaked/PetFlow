@@ -6,9 +6,13 @@ metadata:
     kubernetes.io/ingress.class: alb
     alb.ingress.kubernetes.io/scheme: internet-facing
     alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP":80},{"HTTPS":443}]'
+    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:eu-central-1:160885257498:certificate/8a3b79d0-f8c5-4d12-a582-73ecee59abc9
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
 spec:
   rules:
-    - http:
+    - host: petflow.shaked.in
+      http:
         paths:
           - path: /
             pathType: Prefix
