@@ -29,3 +29,10 @@ output "cluster_name" {
 output "cluster_endpoint" {
   value = module.eks.cluster_endpoint
 }
+
+output "pet_images_bucket" {
+  value = aws_s3_bucket.pet_images.bucket
+}
+output "petflow_api_irsa_role_arn" {
+  value = module.petflow_api_irsa.arn
+}

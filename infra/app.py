@@ -3,6 +3,7 @@ import uuid
 from datetime import timedelta
 
 import bcrypt
+import boto3
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_sqlalchemy import SQLAlchemy
@@ -23,6 +24,7 @@ class Pet(db.Model):
     name = db.Column(db.String(120), nullable=False)
     type = db.Column(db.String(80), nullable=False)
     age = db.Column(db.Integer, nullable=True)
+    image_url = db.Column(db.String(512), nullable=True)
     created_by = db.Column(db.String(36), db.ForeignKey("users.id"), nullable=False)
 
 def create_app():
@@ -33,6 +35,8 @@ def create_app():
     db_user = os.getenv("DB_USER", "petflow_admin")
     db_password = os.getenv("DB_PASSWORD")
     jwt_secret = os.getenv("JWT_SECRET", "change-me-in-production")
+    s3_bucket = os.getenv("S3_BUCKET")
+    aws_region = os.getenv("AWS_REGION", "eu-central-1")
 
     app.config["SQLALCHEMY_DATABASE_URI"] = (
         f"postgresql://{db_user}:{db_password}@{db_host}:5432/{db_name}"
@@ -43,6 +47,8 @@ def create_app():
 
     db.init_app(app)
     JWTManager(app)
+
+    s3_client = boto3.client("s3", region_name=aws_region)
 
     with app.app_context():
         db.create_all()
@@ -102,6 +108,7 @@ def create_app():
                 "name": pet.name,
                 "type": pet.type,
                 "age": pet.age,
+                "image_url": pet.image_url,
                 "created_by": pet.created_by
             }
             for pet in pets
@@ -133,6 +140,37 @@ def create_app():
         return jsonify({
             "message": "pet created",
             "pet_id": pet.id
+        }), 201
+
+    @app.post("/pets/<pet_id>/image")
+    @jwt_required()
+    def upload_pet_image(pet_id):
+        user_id = get_jwt_identity()
+
+        if "image" not in request.files:
+            return jsonify({"error": "image file is required"}), 400
+
+        pet = Pet.query.filter_by(id=pet_id, created_by=user_id).first()
+        if not pet:
+            return jsonify({"error": "pet not found"}), 404
+
+        image = request.files["image"]
+        file_ext = image.filename.rsplit(".", 1)[-1].lower() if "." in image.filename else "jpg"
+        object_key = f"pets/{pet_id}/{uuid.uuid4()}.{file_ext}"
+
+        s3_client.upload_fileobj(
+            image,
+            s3_bucket,
+            object_key,
+            ExtraArgs={"ContentType": image.content_type}
+        )
+
+        pet.image_url = f"s3://{s3_bucket}/{object_key}"
+        db.session.commit()
+
+        return jsonify({
+            "message": "image uploaded",
+            "image_url": pet.image_url
         }), 201
 
     return app
