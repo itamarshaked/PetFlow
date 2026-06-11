@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: petflow-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: petflow-api
+  template:
+    metadata:
+      labels:
+        app: petflow-api
+    spec:
+      containers:
+        - name: petflow-api
+          image: nginx:stable
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
