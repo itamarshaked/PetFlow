@@ -5,7 +5,23 @@ module "eks" {
   name               = "${var.project_name}-cluster"
   kubernetes_version = "1.33"
 
-  endpoint_public_access = true
+  endpoint_public_access                   = true
+  enable_cluster_creator_admin_permissions = true
+
+  addons = {
+    vpc-cni = {
+      most_recent    = true
+      before_compute = true
+    }
+
+    kube-proxy = {
+      most_recent = true
+    }
+
+    coredns = {
+      most_recent = true
+    }
+  }
 
   vpc_id = aws_vpc.main.id
 
