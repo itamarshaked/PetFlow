@@ -1,140 +1,29 @@
-import os
-import uuid
-from datetime import timedelta
+from flask import Flask
+from flask_jwt_extended import JWTManager
+from flask_migrate import Migrate
 
-import bcrypt
-from flask import Flask, jsonify, request
-from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
-from flask_sqlalchemy import SQLAlchemy
+from config import Config
+from database import db
 
-db = SQLAlchemy()
+from routes.health import health_bp
+from routes.auth import auth_bp
+from routes.pets import pets_bp
 
-class User(db.Model):
-    __tablename__ = "users"
-
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    email = db.Column(db.String(255), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
-
-class Pet(db.Model):
-    __tablename__ = "pets"
-
-    id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
-    name = db.Column(db.String(120), nullable=False)
-    type = db.Column(db.String(80), nullable=False)
-    age = db.Column(db.Integer, nullable=True)
-    created_by = db.Column(db.String(36), db.ForeignKey("users.id"), nullable=False)
 
 def create_app():
     app = Flask(__name__)
-
-    db_host = os.getenv("DB_HOST")
-    db_name = os.getenv("DB_NAME", "petflow")
-    db_user = os.getenv("DB_USER", "petflow_admin")
-    db_password = os.getenv("DB_PASSWORD")
-    jwt_secret = os.getenv("JWT_SECRET", "change-me-in-production")
-
-    app.config["SQLALCHEMY_DATABASE_URI"] = (
-        f"postgresql://{db_user}:{db_password}@{db_host}:5432/{db_name}"
-    )
-    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["JWT_SECRET_KEY"] = jwt_secret
-    app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=8)
+    app.config.from_object(Config)
 
     db.init_app(app)
+
     JWTManager(app)
+    Migrate(app, db)
 
-    with app.app_context():
-        db.create_all()
-
-    @app.get("/")
-    def home():
-        return jsonify({
-            "app": "PetFlow",
-            "status": "running",
-            "platform": "EKS"
-        })
-
-    @app.get("/health")
-    def health():
-        return jsonify({"status": "healthy"})
-
-    @app.post("/register")
-    def register():
-        data = request.get_json() or {}
-        email = data.get("email")
-        password = data.get("password")
-
-        if not email or not password:
-            return jsonify({"error": "email and password are required"}), 400
-
-        if User.query.filter_by(email=email).first():
-            return jsonify({"error": "user already exists"}), 409
-
-        password_hash = bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
-
-        user = User(email=email, password_hash=password_hash)
-        db.session.add(user)
-        db.session.commit()
-
-        return jsonify({"message": "user created", "user_id": user.id}), 201
-
-    @app.post("/login")
-    def login():
-        data = request.get_json() or {}
-        email = data.get("email")
-        password = data.get("password")
-
-        user = User.query.filter_by(email=email).first()
-
-        if not user or not bcrypt.checkpw(password.encode(), user.password_hash.encode()):
-            return jsonify({"error": "invalid credentials"}), 401
-
-        token = create_access_token(identity=user.id)
-        return jsonify({"access_token": token})
-
-    @app.get("/pets")
-    def list_pets():
-        pets = Pet.query.all()
-        return jsonify([
-            {
-                "id": pet.id,
-                "name": pet.name,
-                "type": pet.type,
-                "age": pet.age,
-                "created_by": pet.created_by
-            }
-            for pet in pets
-        ])
-
-    @app.post("/pets")
-    @jwt_required()
-    def create_pet():
-        user_id = get_jwt_identity()
-        data = request.get_json() or {}
-
-        name = data.get("name")
-        pet_type = data.get("type")
-        age = data.get("age")
-
-        if not name or not pet_type:
-            return jsonify({"error": "name and type are required"}), 400
-
-        pet = Pet(
-            name=name,
-            type=pet_type,
-            age=age,
-            created_by=user_id
-        )
-
-        db.session.add(pet)
-        db.session.commit()
-
-        return jsonify({
-            "message": "pet created",
-            "pet_id": pet.id
-        }), 201
+    app.register_blueprint(health_bp)
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(pets_bp)
 
     return app
+
 
 app = create_app()
