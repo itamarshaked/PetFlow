@@ -33,6 +33,11 @@ output "cluster_endpoint" {
 output "pet_images_bucket" {
   value = aws_s3_bucket.pet_images.bucket
 }
+
 output "petflow_api_irsa_role_arn" {
-  value = module.petflow_api_irsa.arn
+  value = aws_iam_role.petflow_api_irsa.arn
+}
+
+output "ecr_repository_url" {
+  value = aws_ecr_repository.api.repository_url
 }
