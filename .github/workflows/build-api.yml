@@ -31,6 +31,12 @@ jobs:
       - name: Login to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Run tests
+        working-directory: app
+        run: |
+          pip install -r requirements.txt
+          pytest
+
       - name: Build, tag, and push image
         working-directory: app
         run: |
