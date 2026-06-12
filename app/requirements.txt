@@ -8,3 +8,4 @@ boto3==1.35.0
 alembic==1.16.2
 Flask-Migrate==4.1.0
 pytest==8.3.4
+flask-swagger-ui==4.11.1
