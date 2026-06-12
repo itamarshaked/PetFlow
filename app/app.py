@@ -9,6 +9,7 @@ from routes.auth import auth_bp
 from routes.docs import docs_bp
 from routes.health import health_bp
 from routes.pets import pets_bp
+from prometheus_flask_exporter import PrometheusMetrics
 
 
 def create_app():
@@ -18,6 +19,7 @@ def create_app():
     db.init_app(app)
     JWTManager(app)
     Migrate(app, db)
+    PrometheusMetrics(app)
 
     app.register_blueprint(health_bp)
     app.register_blueprint(auth_bp)

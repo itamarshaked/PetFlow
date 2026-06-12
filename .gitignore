@@ -12,3 +12,17 @@ crash.*.log
 
 __pycache__/
 *.pyc
+
+# Python
+.venv/
+venv/
+.env
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db
+
+# Terraform Lock (לשמור!)
+!.terraform.lock.hcl
