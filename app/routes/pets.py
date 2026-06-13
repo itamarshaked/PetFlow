@@ -100,6 +100,12 @@ def upload_image(pet_id):
     user_id = get_jwt_identity()
     pet = get_pet_for_owner(pet_id, user_id)
 
+    print("=" * 60)
+    print("JWT Identity :", repr(user_id))
+    print("Pet ID       :", repr(pet_id))
+    print("Pet Found    :", pet is not None)
+    print("=" * 60)
+
     print("JWT identity:", get_jwt_identity())
 
     if not pet:
