@@ -50,7 +50,7 @@ data "aws_iam_policy_document" "petflow_api_assume_role" {
 }
 
 resource "aws_iam_role" "petflow_api_irsa" {
-  name               = "${var.project_name}-api-irsa"
+  name               = "petflow-api-irsa-20260611203401865500000001"
   assume_role_policy = data.aws_iam_policy_document.petflow_api_assume_role.json
 
   tags = local.common_tags
