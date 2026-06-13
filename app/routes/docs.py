@@ -241,8 +241,11 @@ def openapi():
                         "name": "pet_id",
                         "in": "path",
                         "required": True,
-                        "schema": {"type": "integer"},
-                        "example": 1
+                        "schema": {
+                        "type": "string",
+                        "format": "uuid"
+                        },
+                        "example": "0798602d-4e13-4e6a-9d89-1651ba2f59a6"
                     }
                 ],
                 "get": {
@@ -312,8 +315,11 @@ def openapi():
                             "name": "pet_id",
                             "in": "path",
                             "required": True,
-                            "schema": {"type": "integer"},
-                            "example": 1
+                            "schema": {
+                            "type": "string",
+                            "format": "uuid"
+                            },
+                            "example": "0798602d-4e13-4e6a-9d89-1651ba2f59a6"
                         }
                     ],
                     "requestBody": {
