@@ -100,6 +100,8 @@ def upload_image(pet_id):
     user_id = get_jwt_identity()
     pet = get_pet_for_owner(pet_id, user_id)
 
+    print("JWT identity:", get_jwt_identity())
+
     if not pet:
         return jsonify({"error": "pet not found"}), 404
 
