@@ -111,10 +111,10 @@ def upload_image(pet_id):
     if not pet:
         return jsonify({"error": "pet not found"}), 404
 
-    if "image" not in request.files:
+    if "file" not in request.files:
         return jsonify({"error": "image file is required"}), 400
 
-    image_url = upload_pet_image(request.files["image"], pet.id)
+    image_url = upload_pet_image(request.files["file"], pet.id)
     pet = update_pet_image(pet, image_url)
 
     return jsonify({
