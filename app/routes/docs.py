@@ -328,9 +328,9 @@ def openapi():
                             "multipart/form-data": {
                                 "schema": {
                                     "type": "object",
-                                    "required": ["file"],
+                                    "required": ["image"],
                                     "properties": {
-                                        "file": {
+                                        "image": {
                                             "type": "string",
                                             "format": "binary",
                                             "description": "Pet image file"

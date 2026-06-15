@@ -14,5 +14,13 @@ class Config:
 
     JWT_SECRET_KEY = os.getenv("JWT_SECRET", "change-me-in-production")
 
+    # Bandit: B105 / B106 possible findings:
+    #JWT_SECRET_KEY = os.getenv("JWT_SECRET")
+
+        #if not JWT_SECRET_KEY:
+            #raise RuntimeError(
+                #"JWT_SECRET environment variable is not configured."
+            #)
+
     AWS_REGION = os.getenv("AWS_REGION", "eu-central-1")
     S3_BUCKET = os.getenv("S3_BUCKET")
