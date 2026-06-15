@@ -1,10 +1,110 @@
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, Response, current_app
 
 docs_bp = Blueprint("docs", __name__)
 
+@docs_bp.get("/docs")
+def swagger_ui():
+    client_id = current_app.config.get("AUTH0_CLIENT_ID")
+
+    return Response(f"""
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PetFlow API Docs</title>
+  <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+</head>
+<body>
+  <div id="swagger-ui"></div>
+
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"></script>
+  <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"></script>
+
+  <script>
+    window.onload = function() {{
+      const ui = SwaggerUIBundle({{
+        url: "/openapi.json",
+        dom_id: "#swagger-ui",
+        presets: [
+          SwaggerUIBundle.presets.apis,
+          SwaggerUIStandalonePreset
+        ],
+        layout: "StandaloneLayout",
+        oauth2RedirectUrl: window.location.origin + "/docs/oauth2-redirect.html"
+      }});
+
+      ui.initOAuth({{
+        clientId: "{client_id}",
+        usePkceWithAuthorizationCodeGrant: true,
+        scopes: "openid profile email"
+      }});
+
+      window.ui = ui;
+    }};
+  </script>
+</body>
+</html>
+""", mimetype="text/html")
+
+@docs_bp.get("/docs/oauth2-redirect.html")
+def oauth2_redirect():
+    return Response("""
+<!doctype html>
+<html>
+<head>
+  <title>Swagger UI OAuth2 Redirect</title>
+</head>
+<body>
+<script>
+'use strict';
+
+function run() {
+  var oauth2 = window.opener.swaggerUIRedirectOauth2;
+  var sentState = oauth2.state;
+  var redirectUrl = oauth2.redirectUrl;
+  var qp = {};
+
+  if (window.location.hash) {
+    window.location.hash.substring(1).split("&").forEach(function(item) {
+      var parts = item.split("=");
+      qp[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1] || "");
+    });
+  } else {
+    window.location.search.substring(1).split("&").forEach(function(item) {
+      var parts = item.split("=");
+      qp[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1] || "");
+    });
+  }
+
+  var isValid = qp.state === sentState;
+
+  if (qp.code) {
+    oauth2.auth.code = qp.code;
+    oauth2.callback({
+      auth: oauth2.auth,
+      redirectUrl: redirectUrl
+    });
+  } else {
+    oauth2.callback({
+      auth: oauth2.auth,
+      token: qp,
+      isValid: isValid,
+      redirectUrl: redirectUrl
+    });
+  }
+
+  window.close();
+}
+
+window.onload = run;
+</script>
+</body>
+</html>
+""", mimetype="text/html")
 
 @docs_bp.get("/openapi.json")
 def openapi():
+    auth0_domain = current_app.config.get("AUTH0_DOMAIN")
+    auth0_audience = current_app.config.get("AUTH0_AUDIENCE")
     return jsonify({
         "openapi": "3.0.0",
         "info": {
@@ -22,6 +122,21 @@ def openapi():
         ],
         "components": {
             "securitySchemes": {
+                "Auth0": {
+                    "type": "oauth2",
+                    "flows": {
+                        "authorizationCode": {
+                            "authorizationUrl": f"https://{auth0_domain}/authorize?audience={auth0_audience}",
+                            "tokenUrl": f"https://{auth0_domain}/oauth/token",
+                            "scopes": {
+                                "openid": "OpenID Connect",
+                                "profile": "User profile",
+                                "email": "User email"
+                            }
+                        }
+                    }
+                },
+
                 "BearerAuth": {
                     "type": "http",
                     "scheme": "bearer",
@@ -103,6 +218,21 @@ def openapi():
             }
         },
         "paths": {
+            "/auth0/me": {
+                "get": {
+                    "tags": ["Authentication"],
+                    "summary": "Validate Auth0 token",
+                    "security": [{"Auth0": ["openid", "profile", "email"]}],
+                    "responses": {
+                        "200": {
+                            "description": "Auth0 token is valid"
+                        },
+                        "401": {
+                            "description": "Invalid Auth0 token"
+                        }
+                    }
+                }
+            },
             "/health": {
                 "get": {
                     "tags": ["Health"],
