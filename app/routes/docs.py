@@ -4,6 +4,9 @@ docs_bp = Blueprint("docs", __name__)
 
 @docs_bp.get("/docs")
 def swagger_ui():
+    @docs_bp.get("/docs/")
+    def swagger_ui_slash():
+        return swagger_ui()
     client_id = current_app.config.get("AUTH0_CLIENT_ID")
 
     return Response(f"""
