@@ -10,14 +10,18 @@ pets_bp = Blueprint("pets", __name__)
 
 
 @pets_bp.get("/pets")
+@jwt_required()
 def list_pets():
-    pets = Pet.query.all()
+    user_id = get_jwt_identity()
+    pets = Pet.query.filter_by(created_by=user_id).all()
     return jsonify([pet.to_dict() for pet in pets])
 
 
 @pets_bp.get("/pets/<pet_id>")
+@jwt_required()
 def get_pet(pet_id):
-    pet = Pet.query.get(pet_id)
+    user_id = get_jwt_identity()
+    pet = get_pet_for_owner(pet_id, user_id)
 
     if not pet:
         return jsonify({"error": "pet not found"}), 404
