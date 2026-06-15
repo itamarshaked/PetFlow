@@ -1,8 +1,13 @@
-from flask import Blueprint, jsonify, Response, current_app
+from flask import Blueprint, jsonify, Response, current_app, redirect
 
 docs_bp = Blueprint("docs", __name__)
 
 @docs_bp.get("/docs")
+def docs_redirect():
+    return redirect("/docs/", code=301)
+
+
+@docs_bp.get("/docs/")
 def swagger_ui():
     @docs_bp.get("/docs/")
     def swagger_ui_slash():
@@ -13,8 +18,18 @@ def swagger_ui():
 <!DOCTYPE html>
 <html>
 <head>
-  <title>PetFlow API Docs</title>
+  <title>PetFlow API • Swagger</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+    <style>
+    body{
+        margin:0;
+        background:#fafafa;
+    }
+
+    .topbar{
+        display:none;
+    }
+    </style>
 </head>
 <body>
   <div id="swagger-ui"></div>
@@ -25,13 +40,17 @@ def swagger_ui():
   <script>
     window.onload = function() {{
       const ui = SwaggerUIBundle({{
-        url: "/openapi.json",
+        url: window.location.origin + "/openapi.json",
         dom_id: "#swagger-ui",
         presets: [
           SwaggerUIBundle.presets.apis,
           SwaggerUIStandalonePreset
         ],
-        layout: "StandaloneLayout",
+        layout: "BaseLayout",
+        deepLinking: true,
+        persistAuthorization: true,
+        displayRequestDuration: true,
+        filter: true,
         oauth2RedirectUrl: window.location.origin + "/docs/oauth2-redirect.html"
       }});
 
