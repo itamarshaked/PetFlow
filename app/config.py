@@ -6,6 +6,10 @@ class Config:
     DB_NAME = os.getenv("DB_NAME", "petflow")
     DB_USER = os.getenv("DB_USER", "petflow_admin")
     DB_PASSWORD = os.getenv("DB_PASSWORD")
+    AUTH0_DOMAIN = os.getenv("AUTH0_DOMAIN")
+    AUTH0_AUDIENCE = os.getenv("AUTH0_AUDIENCE")
+    AUTH0_ISSUER = os.getenv("AUTH0_ISSUER")
+    AUTH0_CLIENT_ID = os.getenv("AUTH0_CLIENT_ID")
 
     SQLALCHEMY_DATABASE_URI = (
         f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:5432/{DB_NAME}"
