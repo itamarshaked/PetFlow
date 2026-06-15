@@ -36,6 +36,21 @@ jobs:
         run: |
           pip install -r requirements.txt
           pytest
+      
+      - name: Scan Infrastructure with Checkov
+        continue-on-error: true
+        uses: bridgecrewio/checkov-action@master
+        with:
+          directory: infra
+          framework: terraform
+          output_format: cli
+      
+      - name: Scan Python Code with Bandit
+        continue-on-error: true
+        working-directory: app
+        run: |
+          pip install bandit
+          bandit -r . -f txt
 
       - name: Build, tag, and push image
         working-directory: app
