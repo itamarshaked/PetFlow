@@ -1,6 +1,5 @@
 from flask import Blueprint, jsonify, request, g
-from services.auth0_service import requires_auth
-
+from services.auth_guard import requires_any_auth
 from database import db
 from models import Pet
 from services.pet_service import create_pet_for_user, get_pet_for_owner, update_pet_image

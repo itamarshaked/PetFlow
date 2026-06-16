@@ -1,16 +1,16 @@
 import uuid
 from datetime import datetime
-
 from database import db
-
 
 class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
     email = db.Column(db.String(255), unique=True, nullable=False)
-    password_hash = db.Column(db.String(255), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    auth_provider = db.Column(db.String(20), nullable=False, default="local")
+    external_id = db.Column(db.String(255), nullable=True, unique=True)
 
 
 class Pet(db.Model):
