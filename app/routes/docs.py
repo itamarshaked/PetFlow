@@ -68,52 +68,61 @@ def swagger_ui():
 def oauth2_redirect():
     return Response("""
 <!doctype html>
-<html>
+<html lang="en-US">
 <head>
-  <title>Swagger UI OAuth2 Redirect</title>
+    <title>Swagger UI: OAuth2 Redirect</title>
 </head>
 <body>
 <script>
 'use strict';
+function run () {
+    var oauth2 = window.opener.swaggerUIRedirectOauth2;
+    var sentState = oauth2.state;
+    var redirectUrl = oauth2.redirectUrl;
+    var isValid, qp, arr;
 
-function run() {
-  var oauth2 = window.opener.swaggerUIRedirectOauth2;
-  var sentState = oauth2.state;
-  var redirectUrl = oauth2.redirectUrl;
-  var qp = {};
+    if (/code|token|error/.test(window.location.hash)) {
+        qp = window.location.hash.substring(1).replace('?', '&').split('&');
+    } else {
+        qp = location.search.substring(1).split('&');
+    }
 
-  if (window.location.hash) {
-    window.location.hash.substring(1).split("&").forEach(function(item) {
-      var parts = item.split("=");
-      qp[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1] || "");
+    arr = qp.map(function (v) {
+        var p = v.split('=');
+        var key = decodeURIComponent(p[0]);
+        var value = p[1] ? decodeURIComponent(p[1]) : '';
+        return [key, value];
     });
-  } else {
-    window.location.search.substring(1).split("&").forEach(function(item) {
-      var parts = item.split("=");
-      qp[decodeURIComponent(parts[0])] = decodeURIComponent(parts[1] || "");
-    });
-  }
 
-  var isValid = qp.state === sentState;
-
-  if (qp.code) {
-    oauth2.auth.code = qp.code;
-    oauth2.callback({
-      auth: oauth2.auth,
-      redirectUrl: redirectUrl
+    arr.forEach(function (v) {
+        if (v[0] === 'state') {
+            isValid = v[1] === sentState;
+        }
     });
-  } else {
-    oauth2.callback({
-      auth: oauth2.auth,
-      token: qp,
-      isValid: isValid,
-      redirectUrl: redirectUrl
-    });
-  }
 
-  window.close();
+    if (!isValid) {
+        oauth2.errCb({
+            authId: oauth2.auth.name,
+            source: 'auth',
+            level: 'warning',
+            message: 'Authorization may be unsafe, passed state was changed in server. The passed state wasn\\'t returned from auth server.'
+        });
+    }
+
+    if (oauth2.auth.schema.get('flow') === 'accessCode' ||
+        oauth2.auth.schema.get('flow') === 'authorizationCode' ||
+        oauth2.auth.schema.get('flow') === 'authorization_code') {
+        oauth2.auth.code = arr.filter(function (v) {
+            return v[0] === 'code';
+        }).map(function (v) {
+            return v[1];
+        })[0];
+
+        oauth2.callback({auth: oauth2.auth, redirectUrl: redirectUrl});
+    } else {
+        oauth2.callback({auth: oauth2.auth, token: arr, isValid: isValid, redirectUrl: redirectUrl});
+    }
 }
-
 window.onload = run;
 </script>
 </body>
