@@ -353,7 +353,10 @@ def openapi():
                 "get": {
                     "tags": ["Pets"],
                     "summary": "List all pets",
-                    "security": [{"BearerAuth": []}],
+                    "security": [
+                        {"Auth0": ["openid", "profile", "email"]},
+                        {"BearerAuth": []}
+                    ],
                     "responses": {
                         "200": {
                             "description": "List of pets",
@@ -371,7 +374,10 @@ def openapi():
                 "post": {
                     "tags": ["Pets"],
                     "summary": "Create a new pet",
-                    "security": [{"BearerAuth": []}],
+                    "security": [
+                        {"Auth0": ["openid", "profile", "email"]},
+                        {"BearerAuth": []}
+                    ],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -409,7 +415,10 @@ def openapi():
                 "get": {
                     "tags": ["Pets"],
                     "summary": "Get a pet by ID",
-                    "security": [{"BearerAuth": []}],
+                    "security": [
+                        {"Auth0": ["openid", "profile", "email"]},
+                        {"BearerAuth": []}
+                    ],
                     "responses": {
                         "200": {
                             "description": "Pet found",
@@ -425,7 +434,10 @@ def openapi():
                 "put": {
                     "tags": ["Pets"],
                     "summary": "Update a pet",
-                    "security": [{"BearerAuth": []}],
+                    "security": [
+                        {"Auth0": ["openid", "profile", "email"]},
+                        {"BearerAuth": []}
+                    ],
                     "requestBody": {
                         "required": True,
                         "content": {
@@ -449,7 +461,10 @@ def openapi():
                 "delete": {
                     "tags": ["Pets"],
                     "summary": "Delete a pet",
-                    "security": [{"BearerAuth": []}],
+                    "security": [
+                        {"Auth0": ["openid", "profile", "email"]},
+                        {"BearerAuth": []}
+                    ],
                     "responses": {
                         "200": {
                             "description": "Pet deleted",
@@ -467,7 +482,10 @@ def openapi():
                 "post": {
                     "tags": ["Pets"],
                     "summary": "Upload an image for a pet",
-                    "security": [{"BearerAuth": []}],
+                    "security": [
+                        {"Auth0": ["openid", "profile", "email"]},
+                        {"BearerAuth": []}
+                    ],
                     "parameters": [
                         {
                             "name": "pet_id",
