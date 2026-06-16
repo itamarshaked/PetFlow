@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, Response, current_app, redirect
 
 docs_bp = Blueprint("docs", __name__)
 
+
 @docs_bp.get("/docs")
 def docs_redirect():
     return redirect("/docs/", code=301)
@@ -9,9 +10,6 @@ def docs_redirect():
 
 @docs_bp.get("/docs/")
 def swagger_ui():
-    @docs_bp.get("/docs/")
-    def swagger_ui_slash():
-        return swagger_ui()
     client_id = current_app.config.get("AUTH0_CLIENT_ID")
 
     return Response(f"""
@@ -20,16 +18,15 @@ def swagger_ui():
 <head>
   <title>PetFlow API • Swagger</title>
   <link rel="stylesheet" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
-    <style>
-    body{
-        margin:0;
-        background:#fafafa;
-    }
-
-    .topbar{
-        display:none;
-    }
-    </style>
+  <style>
+    body {{
+      margin: 0;
+      background: #fafafa;
+    }}
+    .topbar {{
+      display: none;
+    }}
+  </style>
 </head>
 <body>
   <div id="swagger-ui"></div>
