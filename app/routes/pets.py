@@ -1,5 +1,5 @@
-from flask import Blueprint, jsonify, request
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import Blueprint, jsonify, request, g
+from services.auth0_service import requires_auth
 
 from database import db
 from models import Pet
@@ -10,17 +10,17 @@ pets_bp = Blueprint("pets", __name__)
 
 
 @pets_bp.get("/pets")
-@jwt_required()
+@requires_any_auth
 def list_pets():
-    user_id = get_jwt_identity()
+    user_id = g.current_user_id
     pets = Pet.query.filter_by(created_by=user_id).all()
     return jsonify([pet.to_dict() for pet in pets])
 
 
 @pets_bp.get("/pets/<pet_id>")
-@jwt_required()
+@requires_any_auth
 def get_pet(pet_id):
-    user_id = get_jwt_identity()
+    user_id = g.current_user_id
     pet = get_pet_for_owner(pet_id, user_id)
 
     if not pet:
@@ -30,9 +30,9 @@ def get_pet(pet_id):
 
 
 @pets_bp.post("/pets")
-@jwt_required()
+@requires_any_auth
 def create_pet():
-    user_id = get_jwt_identity()
+    user_id = g.current_user_id
     data = request.get_json() or {}
 
     if not data.get("name") or not data.get("species"):
@@ -52,9 +52,9 @@ def create_pet():
 
 
 @pets_bp.put("/pets/<pet_id>")
-@jwt_required()
+@requires_any_auth
 def update_pet(pet_id):
-    user_id = get_jwt_identity()
+    user_id = g.current_user_id
     pet = get_pet_for_owner(pet_id, user_id)
 
     if not pet:
@@ -84,9 +84,9 @@ def update_pet(pet_id):
 
 
 @pets_bp.delete("/pets/<pet_id>")
-@jwt_required()
+@requires_any_auth
 def delete_pet(pet_id):
-    user_id = get_jwt_identity()
+    user_id = g.current_user_id
     pet = get_pet_for_owner(pet_id, user_id)
 
     if not pet:
@@ -99,9 +99,9 @@ def delete_pet(pet_id):
 
 
 @pets_bp.post("/pets/<pet_id>/image")
-@jwt_required()
+@requires_any_auth
 def upload_image(pet_id):
-    user_id = get_jwt_identity()
+    user_id = g.current_user_id
     pet = get_pet_for_owner(pet_id, user_id)
 
     print("=" * 60)
