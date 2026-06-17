@@ -11,6 +11,7 @@ class User(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     auth_provider = db.Column(db.String(20), nullable=False, default="local")
     external_id = db.Column(db.String(255), nullable=True, unique=True)
+    role = db.Column(db.String(20), nullable=False, default="user")
 
 
 class Pet(db.Model):

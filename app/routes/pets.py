@@ -7,14 +7,15 @@ from services.s3_service import upload_pet_image
 
 pets_bp = Blueprint("pets", __name__)
 
-
 @pets_bp.get("/pets")
 @requires_any_auth
 def list_pets():
-    user_id = g.current_user_id
-    pets = Pet.query.filter_by(created_by=user_id).all()
-    return jsonify([pet.to_dict() for pet in pets])
+    if getattr(g, "current_user_role", "user") == "admin":
+        pets = Pet.query.all()
+    else:
+        pets = Pet.query.filter_by(created_by=g.current_user_id).all()
 
+    return jsonify([pet.to_dict() for pet in pets])
 
 @pets_bp.get("/pets/<pet_id>")
 @requires_any_auth

@@ -5,6 +5,10 @@ from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 
 from services.auth0_service import get_token_auth_header, verify_auth0_token
 from services.user_service import get_or_create_auth0_user
+from models import User
+user = User.query.get(g.current_user_id)
+g.current_user = user
+g.current_user_role = user.role if user else "user"
 
 
 def requires_any_auth(fn):
@@ -32,6 +36,8 @@ def requires_any_auth(fn):
             user = get_or_create_auth0_user(payload)
             g.current_user_id = user.id
             g.auth_provider = "auth0"
+            g.current_user = user
+            g.current_user_role = user.role
 
             return fn(*args, **kwargs)
 
