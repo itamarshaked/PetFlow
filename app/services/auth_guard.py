@@ -33,7 +33,10 @@ def requires_any_auth(fn):
 
             return fn(*args, **kwargs)
 
-        except Exception:
-            return jsonify({"error": "Unauthorized"}), 401
+        except Exception as exc:
+            return jsonify({
+                "error": "Unauthorized",
+                "details": str(exc)
+            }), 401
 
     return wrapper
