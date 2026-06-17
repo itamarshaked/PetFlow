@@ -11,7 +11,7 @@ from routes.health import health_bp
 from routes.pets import pets_bp
 from prometheus_flask_exporter import PrometheusMetrics
 from routes.me import me_bp
-
+from commands.users import users_cli
 
 def create_app():
     app = Flask(__name__)
@@ -33,3 +33,5 @@ def create_app():
 
 
 app = create_app()
+
+app.cli.add_command(users_cli)
