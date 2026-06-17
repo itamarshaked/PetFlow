@@ -212,12 +212,17 @@ def openapi():
                 },
                 "PetRequest": {
                     "type": "object",
-                    "required": ["name", "species", "age"],
+                    "required": ["name", "species" ],
                     "properties": {
-                        "name": {"type": "string", "example": "Dubi"},
+                        "name": {"type": "string", "example": "Leyn"},
                         "species": {"type": "string", "example": "Dog"},
-                        "age": {"type": "integer", "example": 4}
-                    }
+                        "breed": {"type": "string", "nullable": True, "example": "Mixed"},
+                        "gender": {"type": "string", "nullable": True, "example": "Female"},
+                        "age": {"type": "integer", "nullable": True, "example": 8},
+                        "color": {"type": "string", "nullable": True, "example": "Brown"},
+                        "description": {"type": "string", "nullable": True, "example": "Friendly dog"},
+                        "chip_number": {"type": "string", "nullable": True, "example": "985141000123456"}
+                }
                 },
                 "PetResponse": {
                     "type": "object",
