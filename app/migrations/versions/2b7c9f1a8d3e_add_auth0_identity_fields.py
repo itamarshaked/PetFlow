@@ -35,6 +35,13 @@ def upgrade():
         ),
     )
 
+    op.alter_column(
+        "users",
+        "password_hash",
+        existing_type=sa.String(length=255),
+        nullable=True,
+)
+	
     op.create_unique_constraint(
         "uq_users_external_id",
         "users",
@@ -48,6 +55,13 @@ def downgrade():
         "users",
         type_="unique",
     )
+
+    op.alter_column(
+        "users",
+        "password_hash",
+        existing_type=sa.String(length=255),
+        nullable=False,
+)
 
     op.drop_column("users", "external_id")
     op.drop_column("users", "auth_provider")
