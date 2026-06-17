@@ -109,7 +109,7 @@ def upload_image(pet_id):
     print("Pet Found    :", pet is not None)
     print("=" * 60)
 
-    print("JWT identity:", get_jwt_identity())
+    print("Current user:", g.current_user_id)
 
     if not pet:
         return jsonify({"error": "pet not found"}), 404
