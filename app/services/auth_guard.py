@@ -4,7 +4,7 @@ from flask import g, jsonify
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
 
 from models import User
-from services.auth0_service import get_token_auth_header, verify_auth0_token
+from services.auth0_service import get_token_auth_header, verify_auth0_token, get_auth0_userinfo
 from services.user_service import get_or_create_auth0_user
 
 
@@ -31,6 +31,11 @@ def requires_any_auth(fn):
                 raise Exception(error)
 
             payload = verify_auth0_token(token)
+            userinfo = get_auth0_userinfo(token)
+
+            payload["email"] = payload.get("email") or userinfo.get("email")
+            payload["name"] = payload.get("name") or userinfo.get("name")
+            payload["picture"] = payload.get("picture") or userinfo.get("picture")
             user = get_or_create_auth0_user(payload)
 
             g.current_user_id = user.id

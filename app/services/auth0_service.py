@@ -4,6 +4,7 @@ from urllib.request import urlopen
 
 from flask import request, jsonify, current_app, g
 from jose import jwt
+import requests
 
 
 def get_token_auth_header():
@@ -85,3 +86,12 @@ def requires_auth(f):
         return f(*args, **kwargs)
 
     return decorated
+def get_auth0_userinfo(token):
+    auth0_domain = current_app.config.get("AUTH0_DOMAIN")
+    response = requests.get(
+        f"https://{auth0_domain}/userinfo",
+        headers={"Authorization": f"Bearer {token}"},
+        timeout=5,
+    )
+    response.raise_for_status()
+    return response.json()
