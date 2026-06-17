@@ -2,6 +2,8 @@ from functools import wraps
 
 from flask import g, jsonify
 from flask_jwt_extended import verify_jwt_in_request, get_jwt_identity
+
+from services.auth0_service import get_token_auth_header, verify_auth0_token
 from services.user_service import get_or_create_auth0_user
 
 
