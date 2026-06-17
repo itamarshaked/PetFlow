@@ -266,6 +266,24 @@ def openapi():
                     }
                 }
             },
+            "/me": {
+                "get": {
+                    "tags": ["Authentication"],
+                    "summary": "Get current authenticated user",
+                    "security": [
+                        {"Auth0": ["openid", "profile", "email"]},
+                        {"BearerAuth": []}
+                    ],
+                    "responses": {
+                        "200": {
+                            "description": "Current user details"
+                        },
+                        "401": {
+                            "description": "Unauthorized"
+                        }
+                    }
+                }
+            },
             "/health": {
                 "get": {
                     "tags": ["Health"],

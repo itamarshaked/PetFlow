@@ -10,6 +10,7 @@ from routes.docs import docs_bp
 from routes.health import health_bp
 from routes.pets import pets_bp
 from prometheus_flask_exporter import PrometheusMetrics
+from routes.me import me_bp
 
 
 def create_app():
@@ -26,6 +27,7 @@ def create_app():
     app.register_blueprint(auth0_bp)
     app.register_blueprint(pets_bp)
     app.register_blueprint(docs_bp)
+    app.register_blueprint(me_bp)
 
     return app
 
